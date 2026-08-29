@@ -124,7 +124,12 @@ The dataset was designed to contain realistic problems:
 ### Power BI Dashboard
 ![Power BI Dashboard](it-support-project/it_support_ticket_dashboard.png)
 
-*(Power Query cleaning steps and Power Automate flow screenshots — coming soon)*
+*(Power Query cleaning steps and Power Automate flow screenshots )*
+<img width="1920" height="973" alt="Screenshot 2026-08-29 210328" src="https://github.com/user-attachments/assets/6ebe2b99-10cc-45ea-9592-39f1ea74a0eb" />
+
+<img width="1908" height="889" alt="Screenshot 2026-08-29 210932" src="https://github.com/user-attachments/assets/4bae0453-fc30-4d5b-b9ac-884008178ac3" />
+
+
 
 ---
 
