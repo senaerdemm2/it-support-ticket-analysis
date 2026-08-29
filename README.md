@@ -123,11 +123,17 @@ The dataset was designed to contain realistic problems:
 
 ### Power BI Dashboard
 ![Power BI Dashboard](it-support-project/it_support_ticket_dashboard.png)
+Interactive dashboard built on a star schema with DAX measures: 5 KPI cards (Total Tickets, SLA Met %, Avg Resolution, Open Tickets, Avg CSAT), monthly trend and priority breakdown.
 
-*(Power Query cleaning steps and Power Automate flow screenshots )*
+### Power Query Cleaning
 <img width="1920" height="973" alt="Screenshot 2026-08-29 210328" src="https://github.com/user-attachments/assets/6ebe2b99-10cc-45ea-9592-39f1ea74a0eb" />
 
+The Applied Steps panel shows the full cleaning workflow: duplicate removal (5,040 → 5,000 rows), trimming, capitalizing inconsistent category names, filtered rows and a custom sla_met column.
+
+### Power Automate — Email Content
 <img width="1908" height="889" alt="Screenshot 2026-08-29 210932" src="https://github.com/user-attachments/assets/4bae0453-fc30-4d5b-b9ac-884008178ac3" />
+
+
 
 
 <img width="1156" height="889" alt="Screenshot 2026-08-29 211517" src="https://github.com/user-attachments/assets/f1d4e055-ae57-4f4d-a04c-72db5ab563f7" />
