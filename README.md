@@ -143,4 +143,4 @@ The Applied Steps panel shows the full cleaning workflow: duplicate removal (5,0
 
 ---
 
-*Built as a portfolio project for a Junior Data Analyst application. Warsaw, 2026.*
+*Built as a portfolio project for a Junior Data Analyst application. 2026.*
