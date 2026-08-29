@@ -130,6 +130,10 @@ The dataset was designed to contain realistic problems:
 <img width="1908" height="889" alt="Screenshot 2026-08-29 210932" src="https://github.com/user-attachments/assets/4bae0453-fc30-4d5b-b9ac-884008178ac3" />
 
 
+<img width="1156" height="889" alt="Screenshot 2026-08-29 211517" src="https://github.com/user-attachments/assets/f1d4e055-ae57-4f4d-a04c-72db5ab563f7" />
+
+
+
 
 ---
 
