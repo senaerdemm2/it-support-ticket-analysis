@@ -1,0 +1,13 @@
+agent_id,agent_name,team,location
+AGT-01,Katarzyna Nowak,Service Desk,Krakow
+AGT-02,Marek Kowalski,Service Desk,Krakow
+AGT-03,Aylin Demir,Service Desk,Krakow
+AGT-04,Rahul Sharma,Network Operations,Krakow
+AGT-05,Tomasz Wisniewski,Network Operations,Krakow
+AGT-06,Sofia Garcia,Network Operations,Remote
+AGT-07,Lucas Silva,Security Operations,Krakow
+AGT-08,Anna Schmidt,Security Operations,Remote
+AGT-09,Emre Yilmaz,Field Support,Krakow
+AGT-10,Piotr Zielinski,Field Support,Krakow
+AGT-11,Maria Rossi,Service Desk,Remote
+AGT-12,Jonas Weber,Network Operations,Krakow

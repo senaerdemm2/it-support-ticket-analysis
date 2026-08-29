@@ -1,0 +1,29 @@
+IT SUPPORT TICKETS - DATA DICTIONARY
+=====================================
+Files: tickets.csv (5040 rows incl. intentional duplicates), agents.csv (12 rows)
+Period: 2025-08-01 to 2026-08-27
+
+tickets.csv columns
+- ticket_id            : unique ID, format TKT-00001 (contains ~40 exact duplicate rows - on purpose)
+- opened_at            : ticket open datetime (YYYY-MM-DD HH:MM:SS)
+- closed_at            : close datetime, EMPTY for open/in-progress tickets
+- category             : Network / Software / Hardware / Access & Accounts / Security / Email & Collaboration
+                         (NOTE: ~8% of values have inconsistent casing or extra spaces - on purpose)
+- priority             : P1 - Critical / P2 - High / P3 - Medium / P4 - Low
+- status               : Closed / Resolved / In Progress / Open
+- sla_target_hours     : SLA target by priority (P1=4, P2=8, P3=24, P4=48)
+- resolution_hours     : hours from open to close, NULL for open tickets
+- satisfaction_score   : 1-5, many NULLs (surveys not answered)
+- channel              : Email / Phone / Portal / Chat (some EMPTY values - on purpose)
+- requester_department : Finance, HR, IT, Sales, Operations, R&D, Customer Support
+- agent_id             : FK to agents.csv (build this relationship in the data model)
+
+agents.csv columns
+- agent_id   : AGT-01 .. AGT-12
+- agent_name : display name
+- team       : Service Desk / Network Operations / Security Operations / Field Support
+- location   : Krakow / Remote
+
+Suggested derived fields (do them in Power Query / DAX, not in the CSV):
+- SLA met flag: resolution_hours <= sla_target_hours
+- Resolution time bucket, Week/Month columns, open ticket age
