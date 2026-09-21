@@ -73,7 +73,11 @@ it-support-ticket-analysis/
 │   ├── data_dictionary.txt                     # Column definitions
 │   ├── it_support_queries.sql                  # Schema + KPI queries
 │   ├── it_support_ticket_dashboard.png         # Power BI dashboard screenshot
+│   ├── power_automate.png                      # Power Automate Flow
+│   ├── power_automate_email.png                # Power Automate email
+│   ├── power_query_cleaning                    # Power Query cleaning (Remove duplicates,Trimmed text,Capitalized each word,Filtered rows,Added custom,Changed types)
 │   └── tickets.csv                             # 5,040 raw rows (40 intentional duplicates)
+│    
 └── README.md
 ```
 
@@ -157,6 +161,39 @@ Percentages are computed automatically by the Power BI donut chart (count ÷ tot
 | 6 | **Track team-level SLA gaps over time, not as a one-time audit.** All four teams are clustered between 81.4% (Security Ops) and 83% (Network Ops) — a 1.6 pp spread. This is a tight band, not a meaningful performance gap. Add a team-level SLA trend line to the weekly Power Automate report; only trigger a team-level review if a team drifts below 80% or widens its gap from the platform average by more than 3 pp for two consecutive weeks. | Head of Support Operations | A 1.6 pp gap does not justify coaching budget reallocation. Treat the dashboard's `SLA Met % by Team` chart as a monitoring tool with thresholds, not as a ranking exercise — premature intervention on small gaps creates noise without value |
 
 ---
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <img src="it-support-project/power_query_cleaning.png"
+           alt="Power Query Cleaning"
+           width="100%">
+      <br>
+      <b>Power Query Cleaning</b>
+    </td>
+
+    <td width="33%" align="center">
+      <img src="it-support-project/power_automate.png"
+           alt="Power Automate Flow"
+           width="100%">
+      <br>
+      <b>Power Automate Flow</b>
+    </td>
+
+    <td width="33%" align="center">
+      <img src="it-support-project/power_automate_email.png"
+           alt="Automated Weekly Email"
+           width="100%">
+      <br>
+      <b>Automated Weekly Email</b>
+    </td>
+  </tr>
+</table>
+
+The automated workflow cleans and transforms the ticket data in Power Query, 
+runs every Monday at 09:00 (Europe/Warsaw), and delivers the weekly KPI summary 
+to the support manager by email.
 
 ## ⚠️ Known Limitations
 
