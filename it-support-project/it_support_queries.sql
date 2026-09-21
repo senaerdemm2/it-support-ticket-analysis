@@ -1,6 +1,6 @@
 -- ============================================
 -- IT Support Ticket Analysis - Schema & KPI Queries
--- Author: [Ad Soyad]
+-- Author:Sena Erdem
 -- Database: PostgreSQL (it_support)
 -- ============================================
 
