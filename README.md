@@ -1,146 +1,208 @@
-# IT Support Ticket Analysis & Weekly Automated Reporting
+# 🎫 IT Support Ticket Analysis & Weekly Automated Reporting
 
-End-to-end data analytics project: from raw ticket data in **PostgreSQL** to an interactive **Power BI** dashboard, plus an automated weekly email report built with **Power Automate**.
+> End-to-end data analytics project — from raw ticket data in **PostgreSQL** to an interactive **Power BI** dashboard, plus an automated weekly email report built with **Power Automate**.
 
-## Business Question
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?logo=postgresql&logoColor=white)
+![Power BI](https://img.shields.io/badge/Power_BI-Dashboard-F2C811?logo=powerbi&logoColor=black)
+![Power Automate](https://img.shields.io/badge/Power_Automate-Cloud_Flow-0066AD?logo=powerautomate&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Completed-success)
 
-An IT support team receives thousands of tickets. The support manager wants to know:
+---
 
-- Are we meeting our SLA targets?
-- How long do we need to resolve tickets, per priority?
-- Which priorities and channels need attention?
+## 📌 Description
 
-## Tech Stack
+An IT support team receives thousands of tickets every week. This project builds the full reporting stack a support manager needs: raw tickets loaded into PostgreSQL, KPI queries written in SQL, the data cleaned and modeled in Power BI as a star schema, and the resulting dashboard delivered automatically to the manager's inbox every Monday at 09:00 via a Power Automate cloud flow.
+
+The dataset was deliberately designed to contain realistic data-quality issues — 40 duplicate rows, ~6% inconsistent category casing, ~161 missing channel values, and ~22% missing CSAT scores — so the project demonstrates a full data-cleaning discipline in Power Query before modeling. The final dashboard answers three operational questions that a support manager asks every Monday morning (detailed in the Goal section below).
+
+### Dashboard Preview
+
+![Power BI Dashboard](it-support-project/it_support_ticket_dashboard.png)
+
+*Interactive dashboard built on a star schema with DAX measures: 5 KPI cards (Total Tickets, SLA Met %, Avg Resolution, Open Tickets, Avg CSAT), monthly trend, priority breakdown, and category-level resolution times.*
+
+---
+
+## 🎯 Goal
+
+A support manager walks in every Monday morning with three operational questions. This project builds the end-to-end reporting pipeline — from raw tickets in PostgreSQL to a Power Automate-delivered dashboard — that answers them without manual intervention.
+
+### Business Questions Answered
+
+| # | Business Question | Where It's Answered | Short Answer |
+|---|-------------------|---------------------|--------------|
+| 1 | **Are we meeting our SLA targets?** | KPI card `SLA Met %` + `SLA Met % by Team` chart | **82.1% platform-wide** (17.9% breach). All 4 teams clustered in a tight band (81.4% – 83%), so no team is dramatically underperforming — but the 17.9% breach still represents ~864 closed tickets (out of 4,825) that missed their SLA window |
+| 2 | **How long do we take to resolve tickets, per priority?** | KPI card `Avg Resolution (hrs)` + `Avg Resolution by Category` chart + `Priority Mix` donut | Platform average is **16.89 hours**. By category: Security is the slowest at 17.81 hrs, Email & Collaboration the fastest at 16.18 hrs (1.63 hr spread). Per-priority resolution time is not yet surfaced as a dedicated chart — `Priority Mix` shows volume per priority, not resolution time per priority. This is a documented future enhancement |
+| 3 | **Which priorities and channels need attention?** | `Priority Mix` donut chart + `SLA Met % by Team` chart | Priorities: P3+P4 = **80% of all volume** — these are the self-service automation opportunity. Teams: Security Operations is the lowest SLA performer at 81.4%, but only 1.6 pp below the top performer (Network Operations at 83%) |
+
+### Scope Note
+
+The current dashboard answers the **platform-wide SLA question** (single overall SLA %). **Priority-level SLA breakdown** (P1 SLA Met %, P2 SLA Met %, P3 SLA Met %, P4 SLA Met %) is a documented future enhancement — the SQL schema supports it (`priority` and `sla_target_hours` columns exist in the `tickets` table), but the dashboard does not yet surface it as a dedicated visual. The `Priority Mix` donut shows ticket volume by priority, not SLA compliance by priority.
+
+---
+
+## 🧰 Technology
 
 | Layer | Tool | Purpose |
 |-------|------|---------|
-| Database | PostgreSQL (+ DBeaver) | Data storage, KPI queries (GROUP BY, CASE WHEN, CTE) |
-| ETL | Power Query | Connection, cleaning, deduplication, custom columns |
+| Database | PostgreSQL (via DBeaver) | Data storage, KPI queries (GROUP BY, CASE WHEN) |
+| ETL | Power Query (M) | Connection, cleaning, deduplication, custom columns |
 | Modeling & BI | Power BI (DAX) | Star schema, measures, interactive dashboard |
 | Automation | Power Automate | Scheduled weekly report email (cloud flow) |
 
-## Pipeline Overview
+---
 
-### 1. Data layer — PostgreSQL
-Two tables: `tickets` (5,000 rows) and `agents` (12 rows). KPIs calculated directly in SQL using `GROUP BY`, conditional aggregation with `CASE WHEN`, and CTEs with `DATE_TRUNC` for monthly trends. Full schema and queries: [`it_support_queries.sql`](it-support-project/it_support_queries.sql)
+## 💡 Skills Demonstrated
 
-### 2. Cleaning — Power Query
-Connected to PostgreSQL (Import mode), then:
-- Removed duplicates: **5,040 → 5,000 rows** (40 duplicate ticket IDs)
-- Fixed inconsistent category spelling with **Trim + Capitalize** (~8% of rows)
-- Handled missing `channel` values (kept as `null`, excluded from channel analysis)
-- Added custom column `sla_met`:
-  ```
-  if [resolution_hours] = null then null
-  else if [resolution_hours] <= [sla_target_hours] then 1 else 0
-  ```
-  Open tickets have no resolution time yet, so their SLA stays blank — not counted as 0.
+- **SQL (PostgreSQL)**: Conditional aggregation with `CASE WHEN` for SLA Met % computation, `GROUP BY` for priority / category / channel breakdowns, `ROUND()` for clean KPI presentation.
+- **Power Query (M)**: Duplicate removal (5,040 → 5,000 rows), Trim + Capitalize for inconsistent casing, conditional `sla_met` column with null-handling for open tickets.
+- **DAX Modeling**: Star schema (fact `tickets` + dimension `agents`), explicit measures (`DIVIDE` for SLA %, `AVERAGE` for resolution time, `COUNTROWS` for ticket volume, `CALCULATE` for open-tickets count).
+- **Data-Quality Discipline**: Documented every intentional data issue in the README so the cleaning exercise is reproducible — duplicates, casing issues, missing channels, missing CSAT, and null resolution hours for open tickets are all handled explicitly in Power Query.
+- **Reporting Automation**: Power Automate cloud flow with Recurrence trigger (Monday 09:00 Europe/Warsaw) and Send an Email (V2) action with weekly KPI summary.
 
-### 3. Modeling & Dashboard — Power BI
-Star schema: `tickets` = fact table, `agents` = dimension table, many-to-one relationship, single filter direction.
+---
 
-**DAX measures:**
-```dax
-Total Tickets = COUNTROWS(tickets)
+## 💻 Code
 
-SLA Met % = DIVIDE(
-    SUM(tickets[sla_met]),
-    COUNT(tickets[sla_met]),
-    0
-)
+### Repository Structure
 
-Avg Resolution (hrs) = AVERAGE(tickets[resolution_hours])
-
-Open Tickets = CALCULATE(
-    COUNTROWS(tickets),
-    tickets[status] IN { "Open", "In Progress" }
-)
-
-Avg CSAT = AVERAGE(tickets[satisfaction_score])
-
-Month Year = FORMAT(tickets[opened_at], "YYYY-MM")   -- + numeric sort key
+```
+it-support-ticket-analysis/
+├── it-support-project/
+│   ├── agents.csv                              # 12 support agents (dimension table)
+│   ├── data_dictionary.txt                     # Column definitions
+│   ├── it_support_queries.sql                  # Schema + KPI queries
+│   ├── it_support_ticket_dashboard.png         # Power BI dashboard screenshot
+│   └── tickets.csv                             # 5,040 raw rows (40 intentional duplicates)
+└── README.md
 ```
 
-Dashboard: 5 KPI cards, monthly ticket trend, priority donut chart, resolution-hours by priority, ticket volume by channel, slicers for status and priority.
+### SQL File
 
-### 4. Automation — Power Automate
-Scheduled cloud flow:
-1. **Recurrence** trigger — every Monday at 09:00 (Europe/Warsaw)
-2. **Send an email (V2)** — weekly KPI summary sent to the support manager
+| File | What It Does |
+|------|--------------|
+| [`it-support-project/it_support_queries.sql`](it-support-project/it_support_queries.sql) | 4 sections — schema creation, data load checks, cleaning, KPI queries (ticket count by priority, avg resolution by category, overall SLA compliance %) |
 
-Tested manually — report delivered successfully.
+> `.pbix` is not committed to GitHub in this version; the SQL + CSV + Power Query steps documented in this README fully reproduce the dashboard.
 
-## Key Results
+---
 
-| KPI | Value |
-|-----|-------|
-| Total Tickets | 5,000 |
-| SLA Met | 82.1% |
-| Avg Resolution Time | 16.9 hours |
-| Open Tickets | 175 |
-| Avg CSAT | 3.89 / 5 |
+## 📊 Results
 
-Priority mix: P3 46%, P4 31%, P2 15%, P1 5%.
+### Headline KPIs (Power BI Dashboard — All Departments, No Filter)
 
-## Cross-Validation (SQL vs Power BI)
+| KPI | Value | Source |
+|-----|-------|--------|
+| Total Tickets | **5,000** (5,040 raw − 40 duplicates) | `COUNTROWS(tickets)` after Power Query dedup |
+| Open Tickets | **175** | `CALCULATE(COUNTROWS(tickets), status IN {"Open", "In Progress"})` |
+| SLA Met % | **82.1%** | `DIVIDE(SUM(sla_met), COUNT(sla_met), 0)` — DAX measure |
+| Avg Resolution Time | **16.89 hours** | `AVERAGE(resolution_hours)` — open tickets excluded (null) |
+| Avg CSAT | **3.89 / 5** | `AVERAGE(satisfaction_score)` — based on ~78% non-null responses |
 
-| Version | SLA | Why |
-|---------|-----|-----|
-| SQL on raw data (incl. 40 duplicates) | 82.6% | Raw count, duplicates included |
-| Power BI on clean data | 82.1% | Duplicates removed |
+### Priority Mix (Donut Chart — Power BI Dashboard)
 
-The difference is exactly the duplicates. Both numbers are correct — they just answer slightly different questions. Lesson learned: always know which version of the truth you are reporting.
+Percentages are computed automatically by the Power BI donut chart (count ÷ total × 100) on the deduplicated dataset.
 
-## Data Quality Notes (intentional, for practice)
+| Priority | Ticket Count | Share | Note |
+|----------|--------------|-------|------|
+| **P3 — Medium** | 2,471 | **49.42%** | Bulk of workload — operational middle layer |
+| **P4 — Low** | 1,530 | **30.60%** | Low-priority noise — automation opportunity |
+| **P2 — High** | 737 | **14.74%** | Significant — urgent but manageable volume |
+| **P1 — Critical** | 262 | **5.24%** | Critical, low volume — healthy crisis ratio |
+| **Total** | **5,000** | **100%** | Deduplicated (raw was 5,040) |
 
-The dataset was designed to contain realistic problems:
+### Avg Resolution Time by Category (Bar Chart — Power BI Dashboard)
 
-- 40 duplicate rows (removed in Power Query)
-- ~8% inconsistent category casing (fixed with Trim/Capitalize)
-- ~163 missing `channel` values (kept as null)
-- `resolution_hours` is null for open tickets (~175 rows) → excluded from SLA and resolution averages
-- ~20% missing `satisfaction_score` → Avg CSAT is based on available responses
+| Category | Avg Resolution (hrs) | Note |
+|----------|----------------------|------|
+| **Security** | **17.81** | Slowest — but only 1.63 hrs above the fastest |
+| Software | 17.76 | Close second |
+| Hardware | 17.11 | — |
+| Access & Accounts | 16.50 | — |
+| Network | 16.39 | — |
+| Email & Collaboration | 16.18 | Fastest — 1.63 hrs below Security |
+| **Spread** | **1.63 hrs** | Tight band — no category is dramatically slower |
 
-## Repository Files
+### SLA Met % by Team (Bar Chart — Power BI Dashboard)
 
-| File | Description |
-|------|-------------|
-| `it-support-project/tickets.csv` | 5,040 raw rows (includes 40 intentional duplicates — cleaning exercise) |
-| `it-support-project/agents.csv` | 12 support agents (dimension table) |
-| `it-support-project/data_dictionary.txt` | Column definitions for both files |
-| `it-support-project/it_support_queries.sql` | Schema creation, data load checks, cleaning, KPI queries |
-| `it-support-project/it_support_ticket_dashboard.png` | Power BI dashboard screenshot |
+| Team | SLA Met % | Note |
+|------|----------|------|
+| **Network Operations** | **83.0%** | Highest performer |
+| Field Support | 81.9% | — |
+| Service Desk | 81.8% | — |
+| **Security Operations** | **81.4%** | Lowest — but only 1.6 pp below Network Ops |
+| **Spread** | **1.6 pp** | Tight band — no team is dramatically underperforming |
 
-## How to Reproduce
+### Data Quality Issues Found & Resolved
 
-1. Create a PostgreSQL database `it_support` and import both CSVs (DBeaver → import, then fix empty strings: `UPDATE tickets SET channel = NULL WHERE channel = '';`)
-2. In Power BI: Get Data → PostgreSQL → Import mode
-3. Apply the cleaning steps listed above in Power Query
-4. Build the relationship (agents → tickets, many-to-one, single direction) and the DAX measures
-5. Recreate the flow in Power Automate: Recurrence trigger (Monday 09:00) → Send an email (V2)
+| Issue | Count | Resolution |
+|-------|-------|-----------|
+| Duplicate rows | 40 (5,040 → 5,000) | Removed in Power Query (Group By + Keep Duplicates filter) |
+| Inconsistent category casing | ~308 rows (~6%) | Fixed with Trim + Capitalize transform |
+| Missing `channel` values | 161 | Kept as `null`; excluded from channel-level analysis |
+| Missing `satisfaction_score` | ~22% | Kept as `null`; `Avg CSAT` computed on non-null subset only |
+| `resolution_hours` null for open tickets | 175 | Excluded from SLA and Avg Resolution — `sla_met` left as null (not 0) |
 
-## Screenshots
+---
 
-### Power BI Dashboard
-![Power BI Dashboard](it-support-project/it_support_ticket_dashboard.png)
-Interactive dashboard built on a star schema with DAX measures: 5 KPI cards (Total Tickets, SLA Met %, Avg Resolution, Open Tickets, Avg CSAT), monthly trend and priority breakdown.
+## 🎯 Business Recommendations
 
-### Power Query Cleaning
-<img width="1920" height="973" alt="Screenshot 2026-08-29 210328" src="https://github.com/user-attachments/assets/6ebe2b99-10cc-45ea-9592-39f1ea74a0eb" />
+| # | Recommendation | For Whom | Why |
+|---|----------------|----------|-----|
+| 1 | **P3 + P4 = 80% of all ticket volume** — these are medium-to-low priority. Stand up a self-service portal + chatbot for the top 5 P4 categories (password resets, access requests, basic troubleshooting). Every 10% shift from P4 to self-service frees ~150 agent-hours per month. | Head of Support Operations | The donut chart shows volume is dominated by low-urgency tickets; tier-1 agents are spending most of their time on tickets that don't need human intervention |
+| 2 | **Monitor Security-related tickets as an early warning signal — not yet a problem area.** Two independent dashboard signals point to Security: the `Avg Resolution by Category` chart shows Security at **17.81 hrs** (highest, but only 1.63 hrs above the lowest-performing category Email & Collaboration at 16.18 hrs), and the `SLA Met % by Team` chart shows Security Operations at **81.4%** (lowest, but only 1.6 pp below Network Operations at 83%). Set thresholds: if Security resolution time drifts above 20 hrs or SLA drops below 80%, trigger a root-cause analysis. Until then, the team is performing within an acceptable band. | Support Manager | Aggregate SLA (82.1%) hides where small variations exist. Two narrow-but-consistent gaps suggest Security tickets are marginally harder to resolve, but the spreads are tight (1.63 hrs and 1.6 pp). Treating this as a crisis would misallocate resources; treating it as an early-warning metric preserves the option to act before it becomes one |
+| 3 | **Investigate why ~22% of CSAT is missing.** If missingness correlates with high-priority or long-resolution tickets, your CSAT is biased upward — actual satisfaction may be lower than 3.89. Add a follow-up survey trigger for any ticket closed without a CSAT response. | Head of Customer Experience | Missing-data pattern is itself a signal. Missing-at-random is rarely the case in survey data |
+| 4 | **Set an SLA improvement target: 82.1% → 85% in 90 days** (a realistic +2.9 pp delta), with a weekly automated burn-down tracking the metric via the existing Power Automate flow. Extend the Monday email to include a 12-week trend line and a delta vs target. A 90% target can be set as a 12-month goal once the 85% milestone is reached. | Support Manager | All four teams are currently clustered between 81.4% and 83% — a 7.9 pp jump in 90 days would require process overhaul, not incremental improvement. A 2.9 pp delta is ambitious but achievable; the infrastructure (Power Automate weekly email) is already in place |
+| 5 | **Add a required-field check at ticket intake** so `channel` cannot be blank. Currently 161 tickets (3.2%) have no channel — these cannot be analyzed in the channel view and erode the dashboard's completeness. | Engineering / Tooling | The fix is upstream — it's cheaper to fix at intake than to clean in Power Query every week |
+| 6 | **Track team-level SLA gaps over time, not as a one-time audit.** All four teams are clustered between 81.4% (Security Ops) and 83% (Network Ops) — a 1.6 pp spread. This is a tight band, not a meaningful performance gap. Add a team-level SLA trend line to the weekly Power Automate report; only trigger a team-level review if a team drifts below 80% or widens its gap from the platform average by more than 3 pp for two consecutive weeks. | Head of Support Operations | A 1.6 pp gap does not justify coaching budget reallocation. Treat the dashboard's `SLA Met % by Team` chart as a monitoring tool with thresholds, not as a ranking exercise — premature intervention on small gaps creates noise without value |
 
-The Applied Steps panel shows the full cleaning workflow: duplicate removal (5,040 → 5,000 rows), trimming, capitalizing inconsistent category names, filtered rows and a custom sla_met column.
+---
 
-### Power Automate — Email Content
-<img width="1908" height="889" alt="Screenshot 2026-08-29 210932" src="https://github.com/user-attachments/assets/4bae0453-fc30-4d5b-b9ac-884008178ac3" />
+## ⚠️ Known Limitations
 
+1. **Power Automate flow export is not committed to the repo** — only screenshots of the flow + email output are provided as evidence. To fully reproduce the automation, recreate the flow per the documented steps.
+2. **`tickets.ticket_id` is not a PRIMARY KEY** in the PostgreSQL schema — this was a deliberate design choice to preserve the 40 intentional duplicates for the cleaning exercise. In production, deduplication should happen at the database level with a UNIQUE constraint.
+3. **SLA Met % is computed on closed tickets only** (open tickets have null `resolution_hours`). This means SLA trends early in the week (more open tickets) may look artificially healthy — always pair the SLA % with the Open Tickets count when interpreting the metric.
 
+---
 
+## 🚀 How to Reproduce
 
-<img width="1156" height="889" alt="Screenshot 2026-08-29 211517" src="https://github.com/user-attachments/assets/f1d4e055-ae57-4f4d-a04c-72db5ab563f7" />
+1. **Database setup**
+   ```bash
+   # Create PostgreSQL database
+   createdb it_support
+   # Import both CSVs via DBeaver
+   # Fix empty strings:
+   psql -d it_support -c "UPDATE tickets SET channel = NULL WHERE channel = '';"
+   ```
+2. **Run SQL queries** — execute `it-support-project/it_support_queries.sql` in DBeaver to verify schema and KPIs at the SQL layer
+3. **Build the dashboard**
+   - Power BI Desktop → Get Data → PostgreSQL → Import mode
+   - Apply the cleaning steps listed above in Power Query (dedup, trim, capitalize, custom `sla_met` column)
+   - Build the relationship (agents → tickets, many-to-one, single direction)
+   - Apply the DAX measures: `Total Tickets`, `SLA Met %`, `Avg Resolution (hrs)`, `Open Tickets`, `Avg CSAT`
+4. **Set up the Power Automate flow**
+   - Trigger: Recurrence — every Monday at 09:00 (Europe/Warsaw)
+   - Action: Send an email (V2) — weekly KPI summary to the support manager
 
+---
 
+## 📄 Data Source
+
+- **Dataset**: Synthetic IT support ticket dataset designed for portfolio practice (5,000 valid tickets + 40 intentional duplicates)
+- **Tables**: `tickets` (fact), `agents` (dimension)
 
 
 ---
 
-*Built as a portfolio project for a Junior Data Analyst application. 2026.*
+## 👩‍💻 Author
+
+**Sena Erdem** — Data Analyst · SQL · Power BI · Power Automate
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sena-erdem-a64b91345/)
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/senaerdemm2)
+
+---
+
+> Built as a portfolio project for a Junior Data Analyst application. 2026.
